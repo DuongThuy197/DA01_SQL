@@ -6,11 +6,11 @@ FROM
     viewership
 -- EX 2:
 select *,
-case
-    when x + y > z then 'Yes'
-    when x + y < z then 'No'
-end as triangle
-from Triangle 
+    case
+        when x + y > z and x + z > y and y + z > x then 'Yes'
+        else 'No'
+    end as triangle
+from triangle 
 -- EX 3:
 SELECT
     ROUND((COUNT(CASE
