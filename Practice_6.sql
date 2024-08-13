@@ -111,6 +111,14 @@ from purchased_product_customer as a
 inner join total_product as b
 on b.total_product_key = a.purchased_product_key
 -- EX 9:
+with salary as (
+    select *
+    from Employees
+    where salary < 30000
+)
+select salary.employee_id
+from salary
+where salary.manager_id not in (select employee_id as manager_id from Employees)
 -- EX 10:
 with duplicated_job as(
 select company_id, title, description, count(job_id)
@@ -145,3 +153,21 @@ select name as results from cte1
 union
 select title as results from cte2
 -- EX 12:
+WITH FriendCounts AS (
+    SELECT 
+        requester_id AS id,
+        COUNT(*) AS num
+    FROM RequestAccepted
+    GROUP BY requester_id
+
+    UNION ALL
+
+    SELECT 
+        accepter_id AS id,
+        COUNT(*) AS num
+    FROM RequestAccepted
+    GROUP BY accepter_id
+)
+select id, sum(num) as num from FriendCounts
+group by id
+limit 1
