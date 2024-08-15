@@ -48,7 +48,26 @@ select transaction_date, user_id, purchase_count
 from ranking
 where rk = 1
 order by transaction_date
+-- EX 5:
+SELECT user_id,
+tweet_date,
+round(avg(tweet_count) over(partition by user_id order by tweet_date 
+rows between 2 preceding and current row),2) as rolling_avg_3d
+from tweets
 -- EX 6:
+  with duplicated_trans as (
+  select transaction_id, merchant_id, credit_card_id, transaction_timestamp,
+  lag(transaction_timestamp) over(partition by merchant_id order by transaction_timestamp) as next_transaction_timestamp,
+  extract(epoch from transaction_timestamp - 
+      lag(transaction_timestamp) OVER(
+        partition by merchant_id, credit_card_id, amount 
+        order by transaction_timestamp)
+    )/60 AS diff
+  from transactions
+)
+select count(*) from duplicated_trans
+where diff <=10
+-- EX 7:
 with ranking as (
 select category, product, sum(spend) as total_spend,
 RANK() OVER (PARTITION BY category order by sum(spend) desc) AS rank
@@ -58,5 +77,22 @@ group by category, product
 order by category
 )
 select category, product, total_spend from ranking where rank <= 2
--- EX 7:
+-- EX 8:
+with top_song as (
+  select c.artist_name, count(a.song_id) as total_song_top10
+  from global_song_rank as a
+  inner join songs as b
+  on a.song_id = b.song_id
+  inner join artists as c
+  on c.artist_id = b.artist_id
+  where rank <= 10
+  group by c.artist_name
+  order by count(a.song_id) desc
+),
+top_artist as(
+  select *,
+  dense_rank() over(order by total_song_top10 desc) as artist_rank
+  from top_song
+)
+select artist_name, artist_rank from top_artist where artist_rank <= 5
 
