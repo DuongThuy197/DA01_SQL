@@ -57,7 +57,7 @@ from tweets
 -- EX 6:
   with duplicated_trans as (
   select transaction_id, merchant_id, credit_card_id, transaction_timestamp,
-  lag(transaction_timestamp) over(partition by merchant_id order by transaction_timestamp) as next_transaction_timestamp,
+  lag(transaction_timestamp) over(partition by merchant_id, credit_card_id, amount order by transaction_timestamp) as next_transaction_timestamp,
   extract(epoch from transaction_timestamp - 
       lag(transaction_timestamp) OVER(
         partition by merchant_id, credit_card_id, amount 
