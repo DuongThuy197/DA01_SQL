@@ -60,9 +60,6 @@ select * from sales_dataset_rfm_prj
 where quantityordered < (select min_value from txt_min_max)
 or quantityordered > (select max_value from txt_min_max)
 -- C2: Dùng z-score = (users - avg)/stddev
-select avg(quantityordered), stddev(quantityordered)
-from sales_dataset_rfm_prj
-
 WITH cte AS (
     SELECT 
         ordernumber, 
