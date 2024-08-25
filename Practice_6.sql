@@ -32,58 +32,19 @@ on a.page_id = b.page_id
 where liked_date is null
 order by a.page_id 
 -- EX 5:
-with previous_month as (
-    select user_id, event_date
-    from user_actions 
-    where extract (month from event_date) = month - 1
-),
-current_month as (
-    select user_id, month as month
-    from user_actions 
-    where extract (month from event_date) = month)
-select b.month, count(distinct b.user_id) as monthly_active_users
-from previous_month as a
-inner join current_month as b 
-on a.user_id = b.user_id
-group by b.month
+select month, count(distinct user_id) as monthly_active_users
+from user_actions
+where month - extract(month from event_date) = 1
+group by month
 -- EX 6:
-WITH count AS (
-    SELECT
-        EXTRACT(YEAR FROM trans_date) || '-' || EXTRACT(MONTH FROM trans_date) AS month,
-        country,
-        COUNT(id) AS approved_count
-    FROM Transactions
-    WHERE state = 'approved'
-    GROUP BY EXTRACT(YEAR FROM trans_date), EXTRACT(MONTH FROM trans_date), country
-),
-sum_approved_amount AS (
-    SELECT
-        EXTRACT(YEAR FROM trans_date) || '-' || EXTRACT(MONTH FROM trans_date) AS month,
-        country,
-        SUM(amount) AS approved_total_amount
-    FROM Transactions
-    WHERE state = 'approved'
-    GROUP BY EXTRACT(YEAR FROM trans_date), EXTRACT(MONTH FROM trans_date), country
-)
-SELECT
-    EXTRACT(YEAR FROM b.trans_date) || '-' || EXTRACT(MONTH FROM b.trans_date) AS month,
-    b.country,
-    COUNT(b.id) AS total_count,
-    SUM(b.amount) as trans_total_amount,
-    c.approved_count,
-    d.approved_total_amount
-FROM Transactions b
-INNER JOIN count c
-    ON EXTRACT(YEAR FROM b.trans_date) || '-' || EXTRACT(MONTH FROM b.trans_date) = c.month
-    AND b.country = c.country
-INNER JOIN sum_approved_amount d
-    ON EXTRACT(YEAR FROM b.trans_date) || '-' || EXTRACT(MONTH FROM b.trans_date) = d.month
-    AND b.country = d.country
-GROUP BY
-    EXTRACT(YEAR FROM b.trans_date) || '-' || EXTRACT(MONTH FROM b.trans_date),
-    b.country,
-    c.approved_count,
-    d.approved_total_amount
+select TO_CHAR(trans_date,'yyyy-mm') as month,
+country,
+count(id) as trans_count,
+count(id) filter (where state = 'approved') as approved_count,
+sum(amount) as trans_total_amount,
+sum(amount) filter (where state = 'approved') as approved_total_amount
+from Transactions
+group by TO_CHAR(trans_date,'yyyy-mm'), country
 -- EX 7:
 with cte as (
     select product_id,
