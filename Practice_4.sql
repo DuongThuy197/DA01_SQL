@@ -12,12 +12,10 @@ select *,
     end as triangle
 from triangle 
 -- EX 3:
-SELECT
-    ROUND((COUNT(CASE
-        WHEN call_category IS NULL OR call_category = 'n/a' THEN 1
-        ELSE NULL
-    END) * 100.0 / COUNT(*)),1) AS uncategorised_call_pct
-FROM callers
+select
+round(count(case when call_category = 'n/a' or call_category is null then 1 else null end) * 100.0 / count(*),1)
+as uncategorised_call_pct
+from callers
 -- EX 4:
 select name
 from Customer
